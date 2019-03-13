@@ -3,6 +3,7 @@ package com.example.springaopexample;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,11 +48,18 @@ public class SpringAopExampleApplication  implements CommandLineRunner {
     @Configuration
     class PerformanceMeasurement  {
 
+
         @Around("@annotation(MethodTime)")
         public void loggingTime (ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
 
             long start = System.currentTimeMillis();
             System.out.println(proceedingJoinPoint.getTarget());
+
+            MethodSignature signature = (MethodSignature) proceedingJoinPoint.getSignature();
+            Method method = signature.getMethod();
+            MethodTime myAnnotation = method.getAnnotation(MethodTime.class);
+
+            System.out.println( myAnnotation.value());
             proceedingJoinPoint.proceed();
 
             long end = System.currentTimeMillis();
